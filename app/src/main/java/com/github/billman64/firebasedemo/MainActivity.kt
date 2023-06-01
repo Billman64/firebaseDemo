@@ -55,10 +55,21 @@ class MainActivity : ComponentActivity() {
                         Row{
                             Text("Enter value to write to db: ")
                             BasicTextField(
-                                value = textInput, onValueChange = {textInput = it},
+                                value = textInput,
                                 modifier = Modifier.background(Color.Green),
+                                onValueChange = {textInput = it},
+
                             )
                         }
+                        Button(
+
+                            onClick = { writeToDb(textInput) }
+                        ){Text("save to db")}
+
+                        var dbOutput by remember { mutableStateOf("") }
+                        Text(
+                            text = dbOutput
+                        )
 
                     }
 
@@ -66,19 +77,19 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // write to db
-        val db = Firebase.database
-        val ref = db.getReference("message")
 
-        ref.setValue("asdf1")
-        Log.d(TAG, "value written to cloud database")
+
+
 
         // read from db
+        val db = Firebase.database
+        val ref = db.getReference("message")
         ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
 
                 var value = snapshot.getValue()
-                Log.d(TAG, " onDataChange() " + value.toString())
+                Log.d(TAG, " Reading db. onDataChange() " + value.toString())
+//                dbOutput = value  // does now work
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -86,6 +97,18 @@ class MainActivity : ComponentActivity() {
             }
         })
 
+
+    }
+
+
+    fun writeToDb(value:String){
+
+        // write to db
+        val db = Firebase.database
+        val ref = db.getReference("message")
+
+        ref.setValue(value)
+        Log.d(TAG, "value $value written to cloud database")
 
     }
 }
