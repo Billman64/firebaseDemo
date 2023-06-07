@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.billman64.firebasedemo.ui.theme.FirebaseDemoTheme
 import com.google.firebase.database.DataSnapshot
@@ -67,36 +68,37 @@ class MainActivity : ComponentActivity() {
                         ){Text("save to db")}
 
                         var dbOutput by remember { mutableStateOf("") }
-                        Text(
-                            text = dbOutput
-                        )
+//                        Text(
+//                            text = dbOutput
+//                        )
+
+
+
+                        // read from db
+                        val db = Firebase.database
+                        val ref = db.getReference("message")
+                        ref.addValueEventListener(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+
+                                var value = snapshot.getValue().toString()
+                                Log.d(TAG, " Reading db. onDataChange() " + value.toString())
+                                dbOutput = value  // does now work
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                Log.e(TAG, "Error - read failed", error.toException())
+                            }
+                        })
+
+                        showData(dbOutput)
 
                     }
 
                 }
             }
+
+
         }
-
-
-
-
-
-        // read from db
-        val db = Firebase.database
-        val ref = db.getReference("message")
-        ref.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-
-                var value = snapshot.getValue()
-                Log.d(TAG, " Reading db. onDataChange() " + value.toString())
-//                dbOutput = value  // does now work
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e(TAG, "Error - read failed", error.toException())
-            }
-        })
-
 
     }
 
@@ -122,6 +124,16 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
         text = "$name",
         modifier = modifier
+    )
+}
+
+@Composable
+fun showData(data: String){
+    Text(
+        text = data,
+        modifier = Modifier.background(Color.Black),
+        color = Color.Green,
+        fontFamily = FontFamily.Monospace
     )
 }
 
