@@ -30,6 +30,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.billman64.firebasedemo.ui.theme.FirebaseDemoTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthProvider
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -107,16 +110,20 @@ class MainActivity : ComponentActivity() {
 
         // write to db
         val db = Firebase.database
-        val ref = db.getReference("message")
+        var ref = db.getReference("message")
+        var f = Firebase.auth.signInWithCustomToken("3oBaTMOq7ccp4nwOYN1ouUYqRbg1") // temporary. Will be changed and hidden later.
 
-        ref.setValue(value)
-        Log.d(TAG, "value $value written to cloud database")
+
+        val result = ref.setValue(value).isSuccessful
+        if(result){
+            Log.d(TAG, "value $value written to cloud database")
+        } else {
+            Log.e(TAG, " value write not successful! (value: $value) ${f.exception?.message}")
+        }
+
 
     }
 }
-
-
-
 
 
 @Composable
@@ -129,12 +136,20 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun showData(data: String){
-    Text(
-        text = data,
-        modifier = Modifier.background(Color.Black),
-        color = Color.Green,
-        fontFamily = FontFamily.Monospace
-    )
+    Column{
+        Text(
+            text = "Data from cloud db:"
+        )
+
+        Text(
+            text = data,
+            modifier = Modifier.background(Color.Black),
+            color = Color.Green,
+            fontFamily = FontFamily.Monospace
+        )
+
+    }
+
 }
 
 @Preview(showBackground = true)
@@ -143,9 +158,8 @@ fun GreetingPreview() {
     FirebaseDemoTheme {
         Column {
                 Greeting("Spiderman")
-                Text("asdf")
+                showData(data = "sample db data")
+                Text("sample text")
             }
-
-
     }
 }
