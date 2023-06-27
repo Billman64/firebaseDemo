@@ -13,7 +13,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -26,9 +30,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.github.billman64.firebasedemo.ui.theme.FirebaseDemoTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthProvider
@@ -51,50 +58,57 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Column{
+                    Column {
                         Greeting("Firebase demo")
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        var textInput by remember {mutableStateOf("")}
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
 
-                        Row{
-                            Text("Enter value to write to db: ")
-                            BasicTextField(
-                                value = textInput,
-                                modifier = Modifier.background(Color.Green),
-                                onValueChange = {textInput = it},
+                            var textInput by remember { mutableStateOf("") }
 
-                            )
+                            Row {
+                                Text("Enter value to write to db: ")
+                                BasicTextField(
+                                    value = textInput,
+                                    modifier = Modifier.background(Color.Green)
+                                        .border(2.dp, Color.Yellow, shape = RectangleShape),
+                                    onValueChange = { textInput = it },
+
+                                    )
+                            }
+                            Button(
+
+                                onClick = { writeToDb(textInput) }
+                            ) { Text("save to db") }
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            var dbOutput by remember { mutableStateOf("") }
+                            //                        Text(
+                            //                            text = dbOutput
+                            //                        )
+
+
+                            // read from db
+                            val db = Firebase.database
+                            val ref = db.getReference("message")
+                            ref.addValueEventListener(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+
+                                    var value = snapshot.getValue().toString()
+                                    Log.d(TAG, " Reading db. onDataChange() " + value.toString())
+                                    dbOutput = value  // does now work
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    Log.e(TAG, "Error - read failed", error.toException())
+                                }
+                            })
+
+                            showData(dbOutput)
+
                         }
-                        Button(
-
-                            onClick = { writeToDb(textInput) }
-                        ){Text("save to db")}
-
-                        var dbOutput by remember { mutableStateOf("") }
-//                        Text(
-//                            text = dbOutput
-//                        )
-
-
-
-                        // read from db
-                        val db = Firebase.database
-                        val ref = db.getReference("message")
-                        ref.addValueEventListener(object : ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-
-                                var value = snapshot.getValue().toString()
-                                Log.d(TAG, " Reading db. onDataChange() " + value.toString())
-                                dbOutput = value  // does now work
-                            }
-
-                            override fun onCancelled(error: DatabaseError) {
-                                Log.e(TAG, "Error - read failed", error.toException())
-                            }
-                        })
-
-                        showData(dbOutput)
-
                     }
 
                 }
@@ -130,7 +144,7 @@ class MainActivity : ComponentActivity() {
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
         text = "$name",
-        modifier = modifier
+        modifier = modifier.padding(4.dp)
     )
 }
 
@@ -143,7 +157,7 @@ fun showData(data: String){
 
         Text(
             text = data,
-            modifier = Modifier.background(Color.Black),
+            modifier = Modifier.background(Color.Black).border(2.dp, Color.DarkGray),
             color = Color.Green,
             fontFamily = FontFamily.Monospace
         )
