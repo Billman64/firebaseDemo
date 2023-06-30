@@ -126,13 +126,14 @@ class MainActivity : ComponentActivity() {
         val db = Firebase.database
         var ref = db.getReference("message")
         var f = Firebase.auth.signInWithCustomToken("3oBaTMOq7ccp4nwOYN1ouUYqRbg1") // temporary. Will be changed and hidden later.
+        var f2 = Firebase.auth.signInWithEmailAndPassword("a@b.com", "111111") // temporary. Will be changed and hidden later.
 
 
         val result = ref.setValue(value).isSuccessful
         if(result){
             Log.d(TAG, "value $value written to cloud database")
         } else {
-            Log.e(TAG, " value write not successful! (value: $value) ${f.exception?.message}")
+            Log.e(TAG, " value write not successful! (value: $value) ${f.exception?.suppressedExceptions} f2:${f2.exception?.message}")
         }
 
 
